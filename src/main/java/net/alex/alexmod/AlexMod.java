@@ -10,15 +10,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.data.loot.EntityLoot;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.DirtPathBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTables;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -93,6 +97,81 @@ public class AlexMod
                 }
             }
         }
+    }
 
+    private float ladderSpeedTimeElapsed = 0;
+    private boolean lastWasUp = true;
+
+    @SubscribeEvent
+    public void onPlayerTick(final TickEvent.PlayerTickEvent event) {
+        Minecraft.getInstance().getDeltaFrameTime();
+        if(event.phase == TickEvent.Phase.START) {
+            final Player player = event.player;
+            if (player.onClimbable() && !player.isCrouching()) {
+                EntityClimber climber = new EntityClimber(player);
+
+                if (climber.isFacingDownward() && !climber.isMovingForward() && !climber.isMovingBackward()) {
+                    if (lastWasUp) {
+                        ladderSpeedTimeElapsed = 0;
+                    } else {
+                        ladderSpeedTimeElapsed++;
+                    }
+                    lastWasUp = false;
+                    climber.moveDownFarther();
+                } else if (climber.isFacingUpward()) {
+                    if (!lastWasUp) {
+                        ladderSpeedTimeElapsed = 0;
+                    } else {
+                        ladderSpeedTimeElapsed++;
+                    }
+                    lastWasUp = true;
+                    climber.moveUpFarther();
+                }
+            } else {
+                ladderSpeedTimeElapsed = 0;
+            }
+        }
+    }
+
+    private class EntityClimber {
+        private Player player;
+
+        public EntityClimber(Player player) {
+            this.player = player;
+        }
+
+        private boolean isFacingDownward() {
+            return player.getXRot() > 0;
+        }
+
+        private boolean isFacingUpward() {
+            return player.getXRot() < 0;
+        }
+
+        private boolean isMovingForward() {
+            return player.zza > 0;
+        }
+
+        private boolean isMovingBackward() {
+            return player.zza < 0;
+        }
+
+        private float getElevationChangeUpdate() {
+            return (float)Math.abs(player.getXRot() / 90.0) * 0.2f * (1 + ladderSpeedTimeElapsed/10);
+        }
+
+        public void moveUpFarther() {
+            int px = 0;
+            float dx = getElevationChangeUpdate();
+            Vec3 move = new Vec3(px, dx, px);
+            player.move(MoverType.SELF, move);
+        }
+
+        public void moveDownFarther() {
+            int px = 0;
+            float dx = getElevationChangeUpdate();
+            Vec3 move = new Vec3(px, (dx * -1), px);
+            player.move(MoverType.SELF, move);
+        }
     }
 }
