@@ -4,16 +4,21 @@ import com.mojang.logging.LogUtils;
 import net.alex.alexmod.fastleafdecay.FldScheduler;
 import net.alex.alexmod.gui.OverlayRegister;
 import net.alex.alexmod.item.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.loot.EntityLoot;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.DirtPathBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -62,17 +67,6 @@ public class AlexMod
         public static void onClientSetup(FMLClientSetupEvent event)
         {
         }
-
-        @SubscribeEvent
-        public static void onRegister(RegisterGuiOverlaysEvent event)
-        {
-            System.out.println(event.toString());
-        }
-    }
-
-    public void onRegister(RegisterGuiOverlaysEvent event)
-    {
-        System.out.println(event.toString());
     }
 
     public void notifyNeighbors(BlockEvent.NeighborNotifyEvent event) {

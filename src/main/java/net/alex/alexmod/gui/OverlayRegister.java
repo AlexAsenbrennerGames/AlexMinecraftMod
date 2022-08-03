@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class OverlayRegister {
 
     public OverlayRegister() {
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+
     }
 
     @SubscribeEvent
